@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <style th:inline="css">
+        @page {
+            margin: 15mm;
+            size: A4;
+        }
+
+        body {
+            font-family: 'Inter', 'DejaVu Sans', sans-serif;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #ff6b00;
+            color: #ffffff;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .name {
+            font-size: 26pt;
+            margin: 0;
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .title {
+            font-size: 14pt;
+            margin: 5px 0;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .contact {
+            font-size: 10pt;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .content {
+            padding: 0 30px;
+        }
+
+        h4 {
+            color: #ff6b00;
+            text-transform: uppercase;
+            border-bottom: 2px solid #ff6b00;
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 12pt;
+            letter-spacing: 1px;
+        }
+
+        .item {
+            margin-bottom: 15px;
+        }
+
+        .item-header-row {
+            margin-bottom: 5px;
+        }
+
+        .item-title {
+            font-weight: bold;
+            font-size: 11pt;
+            color: #333;
+        }
+
+        .item-date {
+            float: right;
+            font-size: 10pt;
+            color: #666;
+        }
+
+        .item-sub {
+            font-style: italic;
+            font-size: 10pt;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-size: 10pt;
+            text-align: justify;
+            white-space: pre-wrap;
+            color: #444;
+        }
+
+        .skill-list {
+            overflow: hidden;
+        }
+
+        .skill-item {
+            display: inline-block;
+            background: #fff3e0;
+            color: #e65100;
+            padding: 4px 10px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 9pt;
+            border: 1px solid #ffe0b2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1 class="name" th:text="${resume.name}">Candidate Name</h1>
+        <p class="title" th:text="${resume.title}">Job Title</p>
+        <div class="contact">
+            <span th:text="${resume.email}">email@example.com</span> |
+            <span th:text="${resume.phone}">phone</span>
+            <span th:if="${resume.location != null && !resume.location.empty}"> | <span
+                    th:text="${resume.location}">location</span></span>
+        </div>
+    </div>
+
+    <div class="content">
+        <div th:if="${resume.summary != null && !resume.summary.empty}">
+            <h4>Professional Summary</h4>
+            <p class="description" th:text="${resume.summary}">Summary text...</p>
+        </div>
+
+        <div th:if="${!resume.experiences.empty}">
+            <h4>Experience</h4>
+            <div th:each="exp : ${resume.experiences}" class="item">
+                <div class="item-header-row">
+                    <span class="item-date" th:text="${exp.startDate + ' - ' + exp.endDate}">Dates</span>
+                    <span class="item-title" th:text="${exp.position}">Position</span>
+                </div>
+                <div class="item-sub" th:text="${exp.company}">Company</div>
+                <p class="description" th:text="${exp.description}">Description</p>
+            </div>
+        </div>
+
+        <div th:if="${!resume.educations.empty}">
+            <h4>Education</h4>
+            <div th:each="edu : ${resume.educations}" class="item">
+                <div class="item-header-row">
+                    <span class="item-date" th:text="${edu.graduationDate}">Graduation Date</span>
+                    <span class="item-title" th:text="${edu.degree}">Degree</span>
+                </div>
+                <div class="item-sub" th:text="${edu.institution}">Institution</div>
+            </div>
+        </div>
+
+        <div th:if="${!resume.skills.empty}">
+            <h4>Skills</h4>
+            <div class="skill-list">
+                <span th:each="skill : ${resume.skills}" class="skill-item" th:text="${skill.name}">Skill</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

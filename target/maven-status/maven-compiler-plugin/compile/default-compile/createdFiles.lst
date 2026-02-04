@@ -1,0 +1,12 @@
+com\example\resumebuilder\service\ResumeService.class
+com\example\resumebuilder\model\Skill$SkillBuilder.class
+com\example\resumebuilder\ResumeBuilderApplication.class
+com\example\resumebuilder\controller\ResumeController.class
+com\example\resumebuilder\model\Experience$ExperienceBuilder.class
+com\example\resumebuilder\model\Resume.class
+com\example\resumebuilder\repository\ResumeRepository.class
+com\example\resumebuilder\model\Resume$ResumeBuilder.class
+com\example\resumebuilder\model\Skill.class
+com\example\resumebuilder\model\Education.class
+com\example\resumebuilder\model\Education$EducationBuilder.class
+com\example\resumebuilder\model\Experience.class

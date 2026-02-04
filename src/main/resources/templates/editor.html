@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resume Builder - Editor</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono&family=Playfair+Display:wght@700&family=Open+Sans&display=swap"
+        rel="stylesheet">
+    <style>
+        .preview-paper {
+            font-family: var(--preview-font, 'Inter', sans-serif);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="navbar">
+            <a href="/" class="logo">
+                <i class="fas fa-file-invoice" style="color: var(--primary-color)"></i> ResumePro
+            </a>
+            <div>
+                <button type="submit" form="resumeForm" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save & Finish
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="editor-container">
+        <!-- Form Section -->
+        <div class="form-section">
+            <form id="resumeForm" th:action="@{/save}" th:object="${resume}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <section class="form-card">
+                    <h3><i class="fas fa-user" style="color: var(--primary-color)"></i> Personal Details</h3>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" th:field="*{name}" class="form-control" placeholder="John Doe"
+                            oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Job Title</label>
+                        <input type="text" th:field="*{title}" class="form-control" placeholder="Software Engineer"
+                            oninput="updatePreview()">
+                    </div>
+                    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" th:field="*{email}" class="form-control" placeholder="john@example.com"
+                                oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="text" th:field="*{phone}" class="form-control" placeholder="+1 234 567 890"
+                                oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Professional Summary</label>
+                        <textarea th:field="*{summary}" class="form-control" rows="4"
+                            placeholder="Brief professional summary..." oninput="updatePreview()"></textarea>
+                    </div>
+                </section>
+
+                <!-- Customization -->
+                <div class="dynamic-section">
+                    <h3><i class="fas fa-paint-brush"></i> Appearance</h3>
+                    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label>Theme Color</label>
+                            <input type="color" th:field="*{themeColor}" class="form-control"
+                                style="height: 45px; padding: 5px;" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Font Family</label>
+                            <select th:field="*{fontFamily}" class="form-control" onchange="updatePreview()">
+                                <option value="'Inter', sans-serif">Inter (Modern)</option>
+                                <option value="'Playfair Display', serif">Playfair (Elegant)</option>
+                                <option value="'Roboto Mono', monospace">Roboto Mono (Tech)</option>
+                                <option value="'Open Sans', sans-serif">Open Sans (Clean)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Experience Section -->
+                <div class="dynamic-section" id="experience-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><i class="fas fa-briefcase"></i> Experience</h3>
+                        <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem;"
+                            onclick="addItem('experience')">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="experience-list">
+                        <div th:each="exp, stat : *{experiences}" class="dynamic-item" th:id="'exp-' + ${stat.index}">
+                            <i class="fas fa-times remove-btn"
+                                th:onclick="'removeItem(\'exp-' + ${stat.index} + '\')'"></i>
+                            <div class="form-group">
+                                <label>Company</label>
+                                <input type="text" th:field="*{experiences[__${stat.index}__].company}"
+                                    class="form-control" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Position</label>
+                                <input type="text" th:field="*{experiences[__${stat.index}__].position}"
+                                    class="form-control" oninput="updatePreview()">
+                            </div>
+                            <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div class="form-group"><label>Start Date</label><input type="text"
+                                        th:field="*{experiences[__${stat.index}__].startDate}" class="form-control"
+                                        placeholder="MM/YYYY" oninput="updatePreview()"></div>
+                                <div class="form-group"><label>End Date</label><input type="text"
+                                        th:field="*{experiences[__${stat.index}__].endDate}" class="form-control"
+                                        placeholder="Present" oninput="updatePreview()"></div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea th:field="*{experiences[__${stat.index}__].description}" class="form-control"
+                                    rows="3" oninput="updatePreview()"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education Section -->
+                <div class="dynamic-section" id="education-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><i class="fas fa-graduation-cap"></i> Education</h3>
+                        <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem;"
+                            onclick="addItem('education')">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="education-list">
+                        <div th:each="edu, stat : *{educations}" class="dynamic-item" th:id="'edu-' + ${stat.index}">
+                            <i class="fas fa-times remove-btn"
+                                th:onclick="'removeItem(\'edu-' + ${stat.index} + '\')'"></i>
+                            <div class="form-group">
+                                <label>Institution</label>
+                                <input type="text" th:field="*{educations[__${stat.index}__].institution}"
+                                    class="form-control" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Degree</label>
+                                <input type="text" th:field="*{educations[__${stat.index}__].degree}"
+                                    class="form-control" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Graduation Date</label>
+                                <input type="text" th:field="*{educations[__${stat.index}__].graduationDate}"
+                                    class="form-control" placeholder="MM/YYYY" oninput="updatePreview()">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="dynamic-section" id="skill-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3><i class="fas fa-tools"></i> Skills</h3>
+                        <button type="button" class="btn btn-outline" style="padding: 0.4rem 0.8rem;"
+                            onclick="addItem('skill')">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                    <div id="skill-list" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div th:each="skill, stat : *{skills}" class="dynamic-item" th:id="'skill-' + ${stat.index}">
+                            <i class="fas fa-times remove-btn"
+                                th:onclick="'removeItem(\'skill-' + ${stat.index} + '\')'"></i>
+                            <input type="text" th:field="*{skills[__${stat.index}__].name}" class="form-control"
+                                placeholder="Skill Name" oninput="updatePreview()">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div id="previewContainer" class="resume-paper">
+                <div id="previewHeader" class="pdf-style-header"
+                    style="background: var(--primary-color); color: white; padding: 2rem; margin: -20mm -20mm 1.5rem -20mm; text-align: left;">
+                    <h1 id="prevName" style="margin: 0; color: white; font-size: 2.5rem;">John Doe</h1>
+                    <p id="prevTitle" style="margin: 5px 0; font-size: 1.2rem; color: rgba(255,255,255,0.9);">Software
+                        Engineer</p>
+                    <div
+                        style="margin-top: 1rem; display: flex; gap: 1.5rem; color: rgba(255,255,255,0.8); font-size: 0.9rem;">
+                        <span id="prevEmail"><i class="fas fa-envelope"></i> john@example.com</span>
+                        <span id="prevPhone"><i class="fas fa-phone"></i> +1 234 567</span>
+                    </div>
+                </div>
+
+                <div id="prevSummarySection">
+                    <h4
+                        style="color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.3rem; margin-top: 2rem;">
+                        Professional Summary</h4>
+                    <p id="prevSummary" style="color: #444; line-height: 1.6;">Professional summary goes here...</p>
+                </div>
+
+                <div id="prevExperienceSection">
+                    <h4
+                        style="color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.3rem; margin-top: 2rem;">
+                        Experience</h4>
+                    <div id="prevExpList"></div>
+                </div>
+
+                <div id="prevEducationSection">
+                    <h4
+                        style="color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.3rem; margin-top: 2rem;">
+                        Education</h4>
+                    <div id="prevEduList"></div>
+                </div>
+
+                <div id="prevSkillSection">
+                    <h4
+                        style="color: var(--primary-color); text-transform: uppercase; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.3rem; margin-top: 2rem;">
+                        Skills</h4>
+                    <div id="prevSkillList" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        let expCount = [[${ resume.experiences.size() }]];
+        let eduCount = [[${ resume.educations.size() }]];
+        let skillCount = [[${ resume.skills.size() }]];
+
+        function addItem(type) {
+            let container, html, id;
+            if (type === 'experience') {
+                container = document.getElementById('experience-list');
+                id = `exp-${expCount}`;
+                html = `
+                    <div class="dynamic-item" id="${id}">
+                        <i class="fas fa-times remove-btn" onclick="removeItem('${id}')"></i>
+                        <div class="form-group">
+                            <label>Company</label>
+                            <input type="text" name="experiences[${expCount}].company" class="form-control" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Position</label>
+                            <input type="text" name="experiences[${expCount}].position" class="form-control" oninput="updatePreview()">
+                        </div>
+                        <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group"><label>Start Date</label><input type="text" name="experiences[${expCount}].startDate" class="form-control" placeholder="MM/YYYY" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>End Date</label><input type="text" name="experiences[${expCount}].endDate" class="form-control" placeholder="Present" oninput="updatePreview()"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="experiences[${expCount}].description" class="form-control" rows="3" oninput="updatePreview()"></textarea>
+                        </div>
+                    </div>`;
+                expCount++;
+            } else if (type === 'education') {
+                container = document.getElementById('education-list');
+                id = `edu-${eduCount}`;
+                html = `
+                    <div class="dynamic-item" id="${id}">
+                        <i class="fas fa-times remove-btn" onclick="removeItem('${id}')"></i>
+                        <div class="form-group">
+                            <label>Institution</label>
+                            <input type="text" name="educations[${eduCount}].institution" class="form-control" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Degree</label>
+                            <input type="text" name="educations[${eduCount}].degree" class="form-control" oninput="updatePreview()">
+                        </div>
+                        <div class="form-group">
+                            <label>Graduation Date</label>
+                            <input type="text" name="educations[${eduCount}].graduationDate" class="form-control" placeholder="MM/YYYY" oninput="updatePreview()">
+                        </div>
+                    </div>`;
+                eduCount++;
+            } else if (type === 'skill') {
+                container = document.getElementById('skill-list');
+                id = `skill-${skillCount}`;
+                html = `
+                    <div class="dynamic-item" id="${id}">
+                        <i class="fas fa-times remove-btn" onclick="removeItem('${id}')"></i>
+                        <input type="text" name="skills[${skillCount}].name" class="form-control" placeholder="Skill Name" oninput="updatePreview()">
+                    </div>`;
+                skillCount++;
+            }
+            container.insertAdjacentHTML('beforeend', html);
+            updatePreview();
+        }
+
+        function removeItem(id) {
+            document.getElementById(id).remove();
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const form = document.getElementById('resumeForm');
+            const formData = new FormData(form);
+
+            const name = formData.get('name') || 'Your Name';
+            const title = formData.get('title') || 'Job Title';
+            const email = formData.get('email') || 'email@example.com';
+            const phone = formData.get('phone') || '+1 234 567';
+            const summary = formData.get('summary') || 'Your professional summary...';
+            const themeColor = formData.get('themeColor') || '#2c3e50';
+            const fontFamily = formData.get('fontFamily') || "'Inter', sans-serif";
+
+            document.getElementById('prevName').innerText = name;
+            document.getElementById('prevTitle').innerText = title;
+            document.getElementById('prevEmail').innerHTML = `<i class="fas fa-envelope"></i> ${email}`;
+            document.getElementById('prevPhone').innerHTML = `<i class="fas fa-phone"></i> ${phone}`;
+            document.getElementById('prevSummary').innerText = summary;
+            document.getElementById('previewContainer').style.fontFamily = fontFamily;
+
+            // Updated color for everything
+            document.getElementById('previewHeader').style.background = themeColor;
+            document.querySelectorAll('.resume-paper h4').forEach(h4 => {
+                h4.style.color = themeColor;
+                h4.style.borderBottomColor = themeColor;
+            });
+
+            // Experiences
+            const expList = document.getElementById('prevExpList');
+            expList.innerHTML = '';
+            document.querySelectorAll('#experience-list .dynamic-item').forEach(item => {
+                const company = item.querySelector('input[name*=".company"]').value;
+                const position = item.querySelector('input[name*=".position"]').value;
+                const start = item.querySelector('input[name*=".startDate"]').value;
+                const end = item.querySelector('input[name*=".endDate"]').value;
+                const desc = item.querySelector('textarea[name*=".description"]').value;
+
+                if (company || position) {
+                    expList.innerHTML += `
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 700; color: #333;">
+                                <span style="font-size: 1.1rem;">${position}</span>
+                                <span style="font-weight: 400; font-size: 0.9rem; color: #666;">${start} - ${end}</span>
+                            </div>
+                            <div style="font-style: italic; color: #555; margin-bottom: 0.5rem;">${company}</div>
+                            <p style="margin: 0; font-size: 0.95rem; white-space: pre-line; color: #444;">${desc}</p>
+                        </div>
+                    `;
+                }
+            });
+
+            // Education
+            const eduList = document.getElementById('prevEduList');
+            eduList.innerHTML = '';
+            document.querySelectorAll('#education-list .dynamic-item').forEach(item => {
+                const inst = item.querySelector('input[name*=".institution"]').value;
+                const deg = item.querySelector('input[name*=".degree"]').value;
+                const date = item.querySelector('input[name*=".graduationDate"]').value;
+
+                if (inst || deg) {
+                    eduList.innerHTML += `
+                        <div style="margin-bottom: 1rem;">
+                            <div style="display: flex; justify-content: space-between; font-weight: 700; color: #333;">
+                                <span style="font-size: 1.1rem;">${deg}</span>
+                                <span style="font-weight: 400; font-size: 0.9rem; color: #666;">${date}</span>
+                            </div>
+                            <div style="font-style: italic; color: #555;">${inst}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Skills
+            const skillList = document.getElementById('prevSkillList');
+            skillList.innerHTML = '';
+            document.querySelectorAll('#skill-list .dynamic-item input').forEach(input => {
+                if (input.value) {
+                    skillList.innerHTML += `<span style="background: #fff3e0; color: #e65100; padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.9rem; font-weight: 600; border: 1px solid #ffe0b2;">${input.value}</span>`;
+                }
+            });
+        }
+
+        // Initial preview
+        updatePreview();
+    </script>
+</body>
+
+</html>

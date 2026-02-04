@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder - Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="navbar">
+            <a href="/" class="logo">
+                <i class="fas fa-file-invoice" style="color: var(--primary-color)"></i> ResumePro
+            </a>
+            <a href="/create" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create New Resume
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="hero" style="text-align: center; margin-bottom: 3rem; padding: 2rem; background: white; border-radius: var(--border-radius); box-shadow: var(--shadow);">
+            <h1 style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 0.5rem;">Professional Resume Builder</h1>
+            <p style="color: var(--text-muted); font-size: 1.1rem;">Create a winning resume in minutes with our professional orange & white templates.</p>
+        </section>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="margin: 0;">Your Saved Resumes</h2>
+        </div>
+        <p th:if="${resumes.empty}">You haven't created any resumes yet. Start building one now!</p>
+        
+        <div class="resume-grid">
+            <div th:each="resume : ${resumes}" class="resume-card">
+                <h3 th:text="${resume.name}">Candidate Name</h3>
+                <p th:text="${resume.title}">Job Title</p>
+                <div class="card-actions">
+                    <a th:href="@{/edit/{id}(id=${resume.id})}" class="btn btn-outline">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                    <a th:href="@{/download/{id}(id=${resume.id})}" class="btn btn-primary">
+                        <i class="fas fa-download"></i> PDF
+                    </a>
+                    <a th:href="@{/delete/{id}(id=${resume.id})}" class="btn" style="color: #e74c3c" onclick="return confirm('Are you sure?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
